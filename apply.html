@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Discord Webhook Form</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <h1>Discord Webhook Form</h1>
+  <form id="webhook-form">
+    <label for="discord-user">Discord user and tag:</label>
+    <input type="text" id="discord-user" name="discord-user" required><br>
+
+    <label for="colony-name">Colony name:</label>
+    <input type="text" id="colony-name" name="colony-name" required><br>
+
+    <label for="ant-species">Ant Species:</label>
+    <input type="text" id="ant-species" name="ant-species" required><br>
+
+    <button type="submit" id="submit-btn">Submit</button>
+  </form>
+
+  <script>
+    $(document).ready(function() {
+      $('#webhook-form').submit(function(e) {
+        e.preventDefault();
+
+        // Check if cooldown is active
+        if (localStorage.getItem('lastSubmissionTime')) {
+          const lastSubmissionTime = new Date(localStorage.getItem('lastSubmissionTime'));
+          const currentTime = new Date();
+
+          // Calculate the time difference in milliseconds
+          const timeDifference = currentTime.getTime() - lastSubmissionTime.getTime();
+
+          // Convert milliseconds to hours
+          const hoursDifference = timeDifference / (1000 * 3600);
+
+          // Check if cooldown time (72 hours) has passed
+          if (hoursDifference < 72) {
+            alert('You can only submit one request per 72 hours.');
+            return;
+          }
+        }
+
+        // Get form inputs
+        const discordUser = $('#discord-user').val();
+        const colonyName = $('#colony-name').val();
+        const antSpecies = $('#ant-species').val();
+
+        // Send data to Discord webhook
+        $.ajax({
+          type: 'POST',
+          url: 'https://discord.com/api/webhooks/1109183700089978941/bt0XxxF_DYUgEiBldtn2Fp1G1_1U-fMJCVHtDaptRfCKtbhEaXHsnd3gNYS1VTksb_wE',
+          data: JSON.stringify({
+            content: `Discord User: ${discordUser}\nColony Name: ${colonyName}\nAnt Species: ${antSpecies}`
+          }),
+          contentType: 'application/json',
+          success: function() {
+            // Store current submission time
+            localStorage.setItem('lastSubmissionTime', new Date());
+            
+            // Show success message
+            alert('Your request has been sent successfully!');
+            
+            // Reset form
+            $('#webhook-form')[0].reset();
+          },
+          error: function() {
+            alert('An error occurred while sending your request.');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
